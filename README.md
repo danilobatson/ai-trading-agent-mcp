@@ -1,36 +1,51 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AI Trading Agent with LunarCrush Social Analytics
 
-## Getting Started
+An AI-powered trading agent that analyzes social sentiment using LunarCrush's unique metrics: mentions, interactions, creators, and AltRank.
 
-First, run the development server:
+## Quick Start
 
+1. Clone and install:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone [your-repo-url]
+cd ai-trading-agent-mcp
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Configure environment:
+```bash
+cp .env.example .env.local
+# Edit .env.local with your API keys
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Start development:
+```bash
+npm run dev
+# In another terminal:
+npm run inngest:dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Environment Variables
 
-## Learn More
+- `LUNARCRUSH_API_KEY` - Get from https://lunarcrush.com/developers
+- `SUPABASE_URL` & `SUPABASE_ANON_KEY` - From your Supabase project
+- `INNGEST_EVENT_KEY` & `INNGEST_SIGNING_KEY` - From Inngest dashboard
+- `OPENAI_API_KEY` - For AI signal analysis
 
-To learn more about Next.js, take a look at the following resources:
+## Architecture
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Next.js 15** - Modern React framework with app directory
+- **LunarCrush API** - Social analytics focusing on key differentiators
+- **Inngest** - Background job processing for signal analysis
+- **Supabase** - Database for storing signals and metrics
+- **OpenAI** - AI agent for trading signal generation
+- **MCP** - Model Context Protocol for AI agent communication
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Key Metrics
 
-## Deploy on Vercel
+This project focuses on LunarCrush's unique advantages:
+- **Mentions** (posts_active) - Social post volume
+- **Interactions** - Total social engagement
+- **Creators** (contributors_active) - Unique content creators
+- **AltRank** - Proprietary market + social ranking
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+These metrics provide insights unavailable elsewhere!

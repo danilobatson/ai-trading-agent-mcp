@@ -1,7 +1,11 @@
-import type { NextConfig } from "next";
+// next.config.ts
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  /* config options here */
+	serverExternalPackages: ['@google/generative-ai'],
+	experimental: {
+		// Remove any deprecated options
+	},
 };
 
 export default nextConfig;
