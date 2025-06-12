@@ -15,7 +15,7 @@
 
 This AI Trading Agent analyzes **real-time social media sentiment** from LunarCrush's API and generates **intelligent trading signals** using Google's Gemini AI. Watch as it processes social data through a **7-step background workflow** with live progress tracking.
 
-### ⚡ **Live Demo**: [See It Live](https://ai-trading-agent-mcp.vercel.app/)
+### ⚡ **Live Demo**: [See It Live](https://ai-trading-agent-gemini.vercel.app/)
 
 ### 🔥 **Key Features**
 
@@ -35,8 +35,8 @@ This AI Trading Agent analyzes **real-time social media sentiment** from LunarCr
 
 ```bash
 # 1. Clone and install
-git clone https://github.com/danilobatson/ai-trading-agent-mcp.git
-cd ai-trading-agent-mcp
+git clone https://github.com/danilobatson/ai-trading-agent-gemini.git
+cd ai-trading-agent-gemini
 npm install
 
 # 2. Copy environment template
@@ -79,8 +79,8 @@ npm run inngest:dev  # Inngest dev server (localhost:8288)
 
 ```bash
 # Clone the repository
-git clone https://github.com/danilobatson/ai-trading-agent-mcp.git
-cd ai-trading-agent-mcp
+git clone https://github.com/danilobatson/ai-trading-agent-gemini.git
+cd ai-trading-agent-gemini
 
 # Install dependencies
 npm install
@@ -425,7 +425,7 @@ curl -X POST http://localhost:3000/api/trigger   # Trigger analysis
 ### Deploy to Vercel (Recommended)
 
 **One-Click Deploy:**
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/danilobatson/ai-trading-agent-mcp)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/danilobatson/ai-trading-agent-gemini)
 
 **Manual Deployment:**
 
@@ -549,16 +549,16 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **⭐ Star this repo** if it helped you learn something new!
 
-**Questions?** Open an [issue](https://github.com/danilobatson/ai-trading-agent-mcp/issues) - I respond to every one!
+**Questions?** Open an [issue](https://github.com/danilobatson/ai-trading-agent-gemini/issues) - I respond to every one!
 
 ---
 
 ## 🚀 Ready to Get Started?
 
-1. **🔥 [Clone the Repository](https://github.com/danilobatson/ai-trading-agent-mcp)**
+1. **🔥 [Clone the Repository](https://github.com/danilobatson/ai-trading-agent-gemini)**
 2. **📚 [Follow the Setup Guide](https://dev.to/dbatson/build-an-ai-trading-agent-with-lunarcrush-google-gemini-in-20-minutes-2bm4)**
 3. **🚀 [Deploy to Production](#deployment)**
-4. **💬 [Join the Discussion](https://github.com/danilobatson/ai-trading-agent-mcp/discussions)**
+4. **💬 [Join the Discussion](https://github.com/danilobatson/ai-trading-agent-gemini/discussions)**
 
 ---
 
