@@ -99,7 +99,10 @@ export function useJobProgress(jobId: string | null): JobProgress {
 				console.error('Failed to fetch job progress:', error);
 				setProgress((prev) => ({
 					...prev,
-					error: error.message,
+					error:
+						error instanceof Error
+							? error.message
+							: 'An unknown error occurred',
 					isLoading: false,
 				}));
 			}
