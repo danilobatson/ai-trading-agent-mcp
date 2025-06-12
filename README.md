@@ -8,7 +8,8 @@
 [![Supabase](https://img.shields.io/badge/Supabase-2.50.0-green?style=for-the-badge&logo=supabase)](https://supabase.com/)
 [![Google AI](https://img.shields.io/badge/Google_AI-0.24.1-orange?style=for-the-badge&logo=google)](https://ai.google.dev/)
 
-![AI Trading Agent Demo](https://via.placeholder.com/800x400/1a1a1a/ffffff?text=AI+Trading+Agent+Demo+%E2%80%A2+Real-time+Progress+Tracking)
+![AI Trading Agent Demo](https://dev-to-uploads.s3.amazonaws.com/uploads/articles/7k3wm4fnprqz87tlz5si.png)
+
 
 ## 🎯 What This Does
 
