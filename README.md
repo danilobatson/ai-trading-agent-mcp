@@ -52,7 +52,7 @@ npm run dev          # Next.js app (localhost:3000)
 npm run inngest:dev  # Inngest dev server (localhost:8288)
 ```
 
-**🎯 Need the detailed setup?** Continue reading for step-by-step instructions with account creation guides.
+**🎯 Need the detailed setup?** Continue reading for step-by-step instructions with account creation guides. Review our guide on [dev.to](https://www.dev.to) if you need more assistance
 
 ---
 
@@ -65,11 +65,10 @@ npm run inngest:dev  # Inngest dev server (localhost:8288)
 - 20 minutes for complete setup
 
 **5 API Keys Required:**
-1. 🌙 **LunarCrush API** (social sentiment data) - *Paid subscription required*
+1. 🌙 **LunarCrush API**  *Subscription required*
 2. 🤖 **Google Gemini API** (AI analysis) - *Free tier available*
 3. 🗄️ **Supabase** (database & real-time) - *Free tier available*
 4. ⚡ **Inngest** (background jobs) - *Free tier available*
-5. 🔔 **Discord Webhook** (notifications) - *Optional, free*
 
 ---
 
@@ -95,13 +94,13 @@ LunarCrush provides real-time social sentiment data for cryptocurrencies with un
 
 1. **Sign up**: Visit [lunarcrush.com/signup](https://lunarcrush.com/signup)
 2. **Choose a plan**:
-   - **Individual** ($24-30/month) - Perfect for this project
-   - **Builder** ($240-300/month) - For production apps
-3. **Generate API key**: Dashboard → API Keys → Create New Key
+   - **Individual** - Perfect for this project
+   - **Builder** - For production apps
+3. **[Generate API key](https://lunarcrush.com/developers/api/authentication)**
 4. **Add to .env.local**:
 
 ```env
-LUNARCRUSH_API_KEY=lc_your_api_key_here
+LUNARCRUSH_API_KEY=your_api_key_here
 ```
 
 **💡 Why LunarCrush?** Powers the social sentiment analysis with unique metrics unavailable elsewhere:
@@ -135,7 +134,7 @@ Supabase provides PostgreSQL database with real-time subscriptions for live prog
    - Project name: `ai-trading-agent`
    - Database password: (save this securely)
    - Region: Choose closest to you
-3. **Get credentials**: Project Settings → API
+3. **Get credentials**: Click Project Overview
    - Copy **Project URL** and **anon public key**
 4. **Add to .env.local**:
 
@@ -207,7 +206,6 @@ Inngest handles our AI analysis pipeline with real-time progress tracking.
 1. **Create account**: Visit [inngest.com](https://www.inngest.com/) → "Sign up"
 2. **Create new app**:
    - App name: `ai-trading-agent`
-   - Environment: `development`
 3. **Get keys**: Settings → Keys
    - Copy **Event Key** (starts with `inngest_`)
    - Copy **Signing Key** (starts with `signkey_`)
@@ -220,22 +218,8 @@ INNGEST_SIGNING_KEY=signkey_your_signing_key_here
 
 **💡 Why Inngest?** Enables complex multi-step AI workflows with real-time progress tracking without blocking the user interface.
 
-### Step 7: Discord Notifications Setup 🔔 *(Optional)*
 
-Get notifications when new trading signals are generated.
-
-1. **Create Discord server** (or use existing)
-2. **Create channel** for notifications (e.g., #trading-alerts)
-3. **Create webhook**:
-   - Channel Settings → Integrations → Webhooks → "New Webhook"
-   - Copy webhook URL
-4. **Add to .env.local**:
-
-```env
-DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/your_webhook_url_here
-```
-
-### Step 8: Final Environment Check ✅
+### Step 7: Final Environment Check ✅
 
 Your `.env.local` should look like this:
 
@@ -253,9 +237,6 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key_here
 # Inngest Background Jobs (Required)
 INNGEST_EVENT_KEY=inngest_your_event_key_here
 INNGEST_SIGNING_KEY=signkey_your_signing_key_here
-
-# Discord Notifications (Optional)
-DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/your_webhook_url_here
 ```
 
 ---
@@ -309,12 +290,10 @@ Complete Analysis (100%)
 | **Database**        | Supabase (PostgreSQL)              | Real-time data storage with subscriptions     |
 | **AI Analysis**     | Google Gemini                      | Trading signal generation                     |
 | **Social Data**     | LunarCrush API                     | Crypto sentiment analysis with unique metrics |
-| **Notifications**   | Discord Webhooks                   | Alert system for new signals                  |
 
 ### Data Flow Architecture
 
 ```mermaid
-graph TD
     A[User Triggers Analysis] --> B[Inngest Background Job]
     B --> C[LunarCrush API]
     C --> D[Social Metrics]
@@ -322,7 +301,6 @@ graph TD
     E --> F[Trading Signals]
     F --> G[Supabase Database]
     G --> H[Real-time UI Updates]
-    G --> I[Discord Notifications]
 ```
 
 ### Real-Time Progress System
@@ -352,6 +330,8 @@ src/
 │   └── page.tsx                  # Main dashboard with real-time UI
 ├── functions/
 │   └── signal-analysis.ts        # 7-step Inngest workflow
+├── hooks/
+│   └── useJobProgress.ts        # Progress supabase subscription
 ├── lib/
 │   ├── lunarcrush.ts            # LunarCrush API client
 │   ├── gemini.ts                # Google AI integration
@@ -393,7 +373,6 @@ curl -X POST http://localhost:3000/api/trigger   # Trigger analysis
 2. Watch progress in real-time
 3. Check Inngest dashboard for detailed logs
 4. Verify signals saved in Supabase
-5. Confirm Discord notifications (if configured)
 ```
 
 ---
@@ -409,7 +388,6 @@ curl -X POST http://localhost:3000/api/trigger   # Trigger analysis
 | **LunarCrush 401 Unauthorized**      | "Invalid API key" error                       | Verify API key format (`lc_...`) and active subscription at lunarcrush.com                      |
 | **Gemini AI Errors**                 | "AI analysis failed"                          | Check Google AI API key, verify quota limits at aistudio.google.com                             |
 | **Real-time Updates Not Working**    | Progress doesn't update, signals don't appear | Ensure Supabase anon key has correct permissions, check browser console for subscription errors |
-| **Discord Notifications Failed**     | No Discord messages                           | Verify webhook URL format, test webhook manually, check channel permissions                     |
 | **Rate Limiting (429 Errors)**       | Analysis fails mid-process                    | LunarCrush Individual plan: 10 req/min limit. Add delays or upgrade to Builder plan             |
 
 ### Debug Workflow
@@ -438,50 +416,6 @@ curl -X POST http://localhost:3000/api/trigger   # Trigger analysis
 - Analysis will fail gracefully with error messages
 - Upgrade your plan for higher limits
 - The system includes rate limiting delays to prevent most issues
-
----
-
-## 🎯 For Interviews & Portfolio
-
-### Technical Highlights
-
-**🚀 For Inngest Interviews:**
-- **Multi-step workflows** - 7-stage AI analysis pipeline with proper error handling
-- **Real-time progress tracking** - Database updates with live UI subscriptions
-- **Production patterns** - Job queuing, status tracking, retry logic, and comprehensive logging
-- **Complex orchestration** - LunarCrush API → AI processing → Database → Notifications
-
-**⚡ For Atlassian Interviews:**
-- **Modern React/TypeScript** - Hooks, component composition, strict type safety
-- **Professional UX** - Loading states, progress animations, error boundaries, responsive design
-- **API integration** - RESTful endpoints with proper error handling and status codes
-- **Real-time features** - WebSocket-like functionality using Supabase subscriptions
-
-**🤖 For AI Developer Roles:**
-- **Production AI pipeline** - Google Gemini with business-focused prompts and structured outputs
-- **Real-world data integration** - Social sentiment → AI analysis → actionable trading signals
-- **Scalable architecture** - Background processing for AI workloads with queue management
-- **Business value demonstration** - AI solving real financial/trading problems with confidence scoring
-
-### Demo Script for Interviews
-
-**"I built an AI Trading Agent that transforms social media sentiment into actionable trading signals. Here's what makes it technically impressive:**
-
-1. **Real-time social data pipeline** - LunarCrush API provides unique metrics like creator diversity and AltRank™
-2. **AI-powered analysis** - Google Gemini processes complex social patterns and generates BUY/SELL/HOLD signals
-3. **7-step background workflow** - Inngest handles the complete pipeline with real-time progress tracking
-4. **Live UI updates** - Supabase subscriptions provide WebSocket-like functionality without polling
-5. **Production-ready architecture** - Comprehensive error handling, rate limiting, and monitoring
-
-**Watch this 7-step analysis happen in real-time..."** *[Demo the application]*
-
-### Architecture Decision Highlights
-
-- **Why Inngest**: Complex workflows need orchestration, not just queues
-- **Why Supabase**: Real-time subscriptions eliminate polling overhead
-- **Why LunarCrush**: Unique social metrics unavailable in other APIs
-- **Why Gemini**: Superior reasoning for financial analysis vs other LLMs
-- **Why TypeScript**: Type safety critical for financial data processing
 
 ---
 
@@ -514,7 +448,6 @@ vercel --prod
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
    - `INNGEST_EVENT_KEY`
    - `INNGEST_SIGNING_KEY`
-   - `DISCORD_WEBHOOK_URL` (optional)
 
 ### Production Configuration
 
@@ -573,10 +506,8 @@ vercel --prod
 5. 🎯 **Open Pull Request**
 
 **Contribution Ideas:**
-- 📊 Additional chart types and visualizations
 - 🤖 Support for other AI providers (Claude, OpenAI)
 - 📈 More sophisticated trading strategies and signals
-- 🔔 Additional notification channels (Slack, email, SMS)
 - 🧪 Comprehensive test suite with integration tests
 - 📱 Mobile app version using React Native
 
@@ -612,7 +543,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 **Built by [Danilo Batson](https://danilobatson.github.io/)**
 
 [![Portfolio](https://img.shields.io/badge/Portfolio-danilobatson.github.io-blue?style=for-the-badge)](https://danilobatson.github.io/)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue?style=for-the-badge&logo=linkedin)](https://www.linkedin.com/in/danilobatson)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue?style=for-the-badge&logo=linkedin)](https://www.linkedin.com/in/danilo-batson)
 [![GitHub](https://img.shields.io/badge/GitHub-Follow-black?style=for-the-badge&logo=github)](https://github.com/danilobatson)
 
 **⭐ Star this repo** if it helped you learn something new!
