@@ -6,28 +6,20 @@ import { supabase } from '@/lib/supabase';
 import type { TradingSignal } from '@/types/trading';
 
 /**
- * MAIN WORKFLOW - Fixed to use consistent job ID across all steps
+ * Main trading signal analysis workflow
+ * Processes social metrics and generates AI-powered trading signals
  */
 export const signalAnalysisWorkflow = inngest.createFunction(
 	{ id: 'signal-analysis-workflow' },
 	{ event: 'trading.analyze' },
 	async ({ event, step }) => {
 		const startTime = Date.now();
-
-		// CRITICAL: Extract job ID from event data at the START
 		const jobId = event.data.jobId;
 
-		console.log('🚀 STARTING SIGNAL ANALYSIS WORKFLOW');
-		console.log('🔗 Job ID from event:', jobId);
-		console.log('📋 Full event data:', JSON.stringify(event.data, null, 2));
-
-		// Validate we have a job ID
 		if (!jobId) {
-			console.error('❌ CRITICAL: No job ID provided in event data!');
 			throw new Error('No job ID provided in event data');
 		}
 
-		// Enhanced progress update function - no more job ID generation
 		const updateProgress = async (
 			stepNumber: number,
 			stepName: string,
@@ -35,10 +27,6 @@ export const signalAnalysisWorkflow = inngest.createFunction(
 			status: string = 'started'
 		) => {
 			const progressPercentage = Math.round((stepNumber / 7) * 100);
-
-			console.log(
-				`📊 UPDATING PROGRESS: Job ${jobId} - Step ${stepNumber}/7 (${progressPercentage}%) - ${stepName}`
-			);
 
 			const updateData = {
 				current_step: stepName,
@@ -49,30 +37,24 @@ export const signalAnalysisWorkflow = inngest.createFunction(
 			};
 
 			try {
-				const { data, error } = await supabase
+				const { error } = await supabase
 					.from('analysis_jobs')
 					.update(updateData)
 					.eq('id', jobId)
 					.select();
 
 				if (error) {
-					console.error('❌ Failed to update progress:', error);
-					console.error('❌ Job ID:', jobId);
-					console.error('❌ Update data was:', updateData);
-				} else {
-					console.log('✅ Progress updated successfully for job:', jobId);
+					console.error(`Failed to update progress for job ${jobId}:`, error);
 				}
 			} catch (error) {
-				console.error('❌ Exception during progress update:', error);
+				console.error('Exception during progress update:', error);
 			}
 		};
 
-		// Step 1: Initialize analysis job - use the SAME job ID
+		// Step 1: Initialize analysis job
 		await step.run('initialize-job', async () => {
-			console.log('=== STEP 1: INITIALIZE JOB ===');
-
 			const jobData = {
-				id: jobId, // Use the job ID from event data
+				id: jobId,
 				status: 'started',
 				current_step: 'Initializing Analysis',
 				step_message: 'Setting up trading analysis pipeline...',
@@ -82,27 +64,21 @@ export const signalAnalysisWorkflow = inngest.createFunction(
 				updated_at: new Date().toISOString(),
 			};
 
-			console.log('💾 CREATING JOB RECORD with ID:', jobId);
-
 			const { data, error } = await supabase
 				.from('analysis_jobs')
 				.insert(jobData)
 				.select();
 
 			if (error) {
-				console.error('❌ JOB CREATION FAILED:', error);
+				console.error('Job creation failed:', error);
 				throw error;
 			}
 
-			console.log('✅ JOB CREATED SUCCESSFULLY:', data);
 			return jobId;
 		});
 
-		// Step 2: Get symbols with progress update
+		// Step 2: Get symbols to analyze
 		const symbolsToAnalyze = await step.run('get-symbols-list', async () => {
-			console.log('=== STEP 2: GET SYMBOLS ===');
-			console.log('📋 Using job ID:', jobId); // Log to confirm same ID
-
 			await updateProgress(
 				2,
 				'Preparing Symbol List',
@@ -112,8 +88,6 @@ export const signalAnalysisWorkflow = inngest.createFunction(
 			const symbolCount = event.data.symbolCount || 5;
 			const symbols = event.data.symbols || ['BTC', 'ETH', 'SOL', 'ADA', 'DOT'];
 			const selectedSymbols = symbols.slice(0, symbolCount);
-
-			console.log(`✅ SELECTED SYMBOLS:`, selectedSymbols);
 
 			await updateProgress(
 				2,
@@ -126,11 +100,8 @@ export const signalAnalysisWorkflow = inngest.createFunction(
 			return selectedSymbols;
 		});
 
-		// Step 3: Fetch social metrics with progress updates
+		// Step 3: Fetch social metrics
 		const socialMetrics = await step.run('fetch-social-metrics', async () => {
-			console.log('=== STEP 3: FETCH SOCIAL METRICS ===');
-			console.log('📋 Using job ID:', jobId); // Log to confirm same ID
-
 			await updateProgress(
 				3,
 				'Fetching Social Data',
@@ -142,7 +113,6 @@ export const signalAnalysisWorkflow = inngest.createFunction(
 			for (let i = 0; i < symbolsToAnalyze.length; i++) {
 				const symbol = symbolsToAnalyze[i];
 				try {
-					// Update progress for each symbol
 					await updateProgress(
 						3,
 						'Fetching Social Data',
@@ -154,24 +124,15 @@ export const signalAnalysisWorkflow = inngest.createFunction(
 					const metrics = await getSocialMetrics(symbol);
 					results.push({ symbol, metrics, success: true });
 
-					console.log(
-						`✅ ${symbol}: ${metrics.mentions.toLocaleString()} mentions, ${metrics.creators.toLocaleString()} creators, AltRank ${
-							metrics.altRank
-						}`
-					);
-
 					// Rate limiting
 					await new Promise((resolve) => setTimeout(resolve, 1500));
 				} catch (error) {
-					console.error(`❌ Failed to fetch ${symbol}:`, error);
+					console.error(`Failed to fetch social metrics for ${symbol}:`, error);
 					results.push({ symbol, metrics: null, success: false });
 				}
 			}
 
 			const successCount = results.filter((r) => r.success).length;
-			console.log(
-				`✅ SOCIAL DATA COMPLETE: ${successCount}/${symbolsToAnalyze.length} successful`
-			);
 
 			await updateProgress(
 				3,
@@ -182,11 +143,8 @@ export const signalAnalysisWorkflow = inngest.createFunction(
 			return results;
 		});
 
-		// Step 4: AI signals with progress updates
+		// Step 4: Generate AI trading signals
 		const tradingSignals = await step.run('generate-ai-signals', async () => {
-			console.log('=== STEP 4: AI SIGNAL GENERATION ===');
-			console.log('📋 Using job ID:', jobId); // Log to confirm same ID
-
 			await updateProgress(
 				4,
 				'AI Signal Generation',
@@ -201,7 +159,6 @@ export const signalAnalysisWorkflow = inngest.createFunction(
 			for (let i = 0; i < successfulMetrics.length; i++) {
 				const result = successfulMetrics[i];
 				try {
-					// Update progress for each AI analysis
 					await updateProgress(
 						4,
 						'AI Signal Generation',
@@ -217,20 +174,13 @@ export const signalAnalysisWorkflow = inngest.createFunction(
 					);
 
 					signals.push(signal);
-					console.log(
-						`✅ ${result.symbol}: ${signal.signal} signal, ${signal.confidence}% confidence`
-					);
 
 					// Rate limiting for Gemini
 					await new Promise((resolve) => setTimeout(resolve, 3000));
 				} catch (error) {
-					console.error(`❌ AI analysis failed for ${result.symbol}:`, error);
+					console.error(`AI analysis failed for ${result.symbol}:`, error);
 				}
 			}
-
-			console.log(
-				`🎯 AI ANALYSIS COMPLETE: Generated ${signals.length} trading signals`
-			);
 
 			await updateProgress(
 				4,
@@ -241,11 +191,8 @@ export const signalAnalysisWorkflow = inngest.createFunction(
 			return signals;
 		});
 
-		// Step 5: Save signals with progress updates
+		// Step 5: Save signals to database
 		const savedSignals = await step.run('save-to-database', async () => {
-			console.log('=== STEP 5: SAVE TO DATABASE ===');
-			console.log('📋 Using job ID:', jobId); // Log to confirm same ID
-
 			await updateProgress(
 				5,
 				'Saving Results',
@@ -270,33 +217,23 @@ export const signalAnalysisWorkflow = inngest.createFunction(
 					if (error) throw error;
 
 					saveResults.push({ symbol: signal.symbol, success: true });
-					console.log(`✅ SAVED ${signal.symbol} signal to database`);
 
-					// Update progress for each save
 					await updateProgress(
 						5,
 						'Saving Results',
 						`Saved ${i + 1}/${tradingSignals.length} signals to database...`
 					);
 				} catch (error) {
-					console.error(`❌ Failed to save ${signal.symbol}:`, error);
+					console.error(`Failed to save signal for ${signal.symbol}:`, error);
 					saveResults.push({ symbol: signal.symbol, success: false });
 				}
 			}
 
-			const successfulSaves = saveResults.filter((r) => r.success).length;
-			console.log(
-				`💾 DATABASE SAVE COMPLETE: ${successfulSaves}/${tradingSignals.length} saved`
-			);
-
 			return saveResults;
 		});
 
-		// Step 6: Generate summary
+		// Step 6: Generate analysis summary
 		const summary = await step.run('generate-summary', async () => {
-			console.log('=== STEP 6: GENERATE SUMMARY ===');
-			console.log('📋 Using job ID:', jobId); // Log to confirm same ID
-
 			await updateProgress(
 				6,
 				'Generating Summary',
@@ -328,25 +265,13 @@ export const signalAnalysisWorkflow = inngest.createFunction(
 					})),
 			};
 
-			console.log('📊 ANALYSIS SUMMARY:', summary);
 			return summary;
 		});
 
-		// Step 7: Complete job
+		// Step 7: Complete analysis
 		await step.run('complete-job', async () => {
-			console.log('=== STEP 7: COMPLETE JOB ===');
-			console.log('📋 Using job ID:', jobId); // Log to confirm same ID
-
 			const duration = Date.now() - startTime;
 
-			console.log('🏁 WORKFLOW COMPLETED!');
-			console.log(
-				`⏱️  Total duration: ${(duration / 1000).toFixed(1)} seconds`
-			);
-			console.log(`📈 Signals generated: ${tradingSignals.length}`);
-			console.log(`🎯 High confidence: ${summary.highConfidence}`);
-
-			// CRITICAL: Final progress update with completion status
 			await updateProgress(
 				7,
 				'Analysis Complete',
@@ -356,10 +281,9 @@ export const signalAnalysisWorkflow = inngest.createFunction(
 				'completed'
 			);
 
-			// Also update other job fields
+			// Update final job statistics
 			try {
-				console.log('💾 UPDATING FINAL JOB STATS...');
-				const { data, error } = await supabase
+				const { error } = await supabase
 					.from('analysis_jobs')
 					.update({
 						signals_generated: tradingSignals.length,
@@ -371,16 +295,13 @@ export const signalAnalysisWorkflow = inngest.createFunction(
 					.select();
 
 				if (error) {
-					console.error('❌ FINAL STATS UPDATE FAILED:', error);
-				} else {
-					console.log('✅ FINAL STATS UPDATED:', data);
+					console.error('Failed to update final job statistics:', error);
 				}
 			} catch (error) {
-				console.error('❌ EXCEPTION UPDATING FINAL STATS:', error);
+				console.error('Exception updating final job statistics:', error);
 			}
 		});
 
-		console.log('🎉 WORKFLOW FULLY COMPLETED!');
 		return {
 			success: true,
 			jobId,
@@ -391,6 +312,9 @@ export const signalAnalysisWorkflow = inngest.createFunction(
 	}
 );
 
+/**
+ * Analyze a single cryptocurrency symbol
+ */
 export const analyzeSingleSymbol = inngest.createFunction(
 	{ id: 'analyze-single-symbol' },
 	{ event: 'trading.analyze.symbol' },
@@ -398,13 +322,9 @@ export const analyzeSingleSymbol = inngest.createFunction(
 		const { symbol } = event.data;
 
 		const result = await step.run('analyze-symbol', async () => {
-			console.log(`🎯 SINGLE SYMBOL ANALYSIS: ${symbol}`);
 			return await generateSignalForSymbol(symbol);
 		});
 
-		console.log(
-			`✅ SINGLE ANALYSIS COMPLETE: ${symbol} → ${result.signal} (${result.confidence}%)`
-		);
 		return result;
 	}
 );

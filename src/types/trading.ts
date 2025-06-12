@@ -1,60 +1,62 @@
-// Core LunarCrush Social Metrics (The Key Differentiators)
+// src/types/trading.ts - TypeScript interfaces for trading system
+
+/**
+ * LunarCrush social metrics - core data structure
+ */
 export interface SocialMetrics {
-  symbol: string;
-  name: string;
-  
-  // Key LunarCrush Metrics - These are what differentiate us from competitors
-  mentions: number;           // posts_active - Number of social posts mentioning the asset
-  interactions: number;       // Total social engagements (likes, comments, shares, views)
-  creators: number;          // contributors_active - Number of unique creators posting
-  altRank: number;           // Proprietary ranking combining market + social data
-  
-  // Supporting metrics
-  galaxyScore?: number;      // Secondary proprietary score
-  sentiment?: number;        // Percentage positive (not our key differentiator)
-  socialDominance?: number;  // Share of voice in category
-  
-  // Market data for context
-  price: number;
-  marketCap: number;
-  volume24h: number;
-  percentChange24h: number;
-  
-  // Metadata
-  timestamp: number;
-  lastUpdated: string;
+	symbol: string;
+	mentions: number; // Number of social posts mentioning the asset
+	interactions: number; // Total social engagements (likes, comments, shares)
+	creators: number; // Number of unique creators posting about the asset
+	altRank: number; // LunarCrush proprietary ranking (lower = better)
+	galaxyScore: number; // LunarCrush health indicator (0-100)
+	timestamp: number; // When the data was fetched
 }
 
-// AI-generated trading signal
+/**
+ * AI-generated trading signal
+ */
 export interface TradingSignal {
-  id: string;
-  symbol: string;
-  signal: 'BUY' | 'SELL' | 'HOLD';
-  confidence: number;        // 0-100 confidence score
-  reasoning: string;         // AI explanation of the signal
-  
-  // The social metrics that drove this signal
-  triggerMetrics: {
-    mentionsChange: number;      // % change in mentions
-    interactionsChange: number;  // % change in interactions  
-    creatorsChange: number;      // % change in unique creators
-    altRankChange: number;       // Change in AltRank position
-  };
-  
-  currentMetrics: SocialMetrics;
-  previousMetrics?: SocialMetrics;
-  
-  // Signal metadata
-  strength: 'WEAK' | 'MODERATE' | 'STRONG';
-  timeframe: '1h' | '4h' | '24h';
-  createdAt: string;
-  expiresAt: string;
+	id: string;
+	symbol: string;
+	signal: 'BUY' | 'SELL' | 'HOLD';
+	confidence: number; // 0-100 confidence score
+	reasoning: string; // AI explanation of the signal
+	metrics: SocialMetrics; // The social metrics that generated this signal
+	createdAt: string; // ISO timestamp when signal was created
 }
 
-// Add other interfaces as needed...
-export interface SignalJobData {
-  symbols?: string[];
-  userId?: string;
-  analysisType: 'MOMENTUM' | 'BREAKOUT' | 'SOCIAL_SENTIMENT' | 'COMPREHENSIVE';
-  webhookUrl?: string;
+/**
+ * Analysis job tracking for real-time progress
+ */
+export interface AnalysisJob {
+	id: string;
+	status: 'started' | 'completed' | 'failed';
+	current_step: string;
+	step_message: string;
+	progress_percentage: number;
+	event_data: any;
+	signals_generated: number;
+	alerts_generated: number;
+	duration_ms: number | null;
+	started_at: string;
+	completed_at: string | null;
+	updated_at: string;
+}
+
+/**
+ * API response types
+ */
+export interface SignalsResponse {
+	success: boolean;
+	signals: TradingSignal[];
+	jobs: AnalysisJob[];
+	timestamp: string;
+}
+
+export interface TriggerResponse {
+	success: boolean;
+	jobId: string;
+	eventId: string;
+	message: string;
 }

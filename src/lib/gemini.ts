@@ -1,4 +1,4 @@
-// src/lib/gemini.ts - Complete Google Gemini AI Client for Trading Signals
+// src/lib/gemini.ts - Google Gemini AI Client for Trading Signals
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import type { SocialMetrics, TradingSignal } from '@/types/trading';
 
@@ -12,7 +12,6 @@ const getGeminiClient = () => {
 
 /**
  * Generate trading signal using Google Gemini AI based on LunarCrush social metrics
- * Focuses on unique differentiators: mentions, interactions, creators, altRank
  */
 export async function generateTradingSignal(
 	symbol: string,
@@ -23,37 +22,27 @@ export async function generateTradingSignal(
 		const genAI = getGeminiClient();
 		const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
-		// Create analysis prompt focusing on LunarCrush differentiators
 		const prompt = createAnalysisPrompt(
 			symbol,
 			currentMetrics,
 			historicalMetrics
 		);
 
-		console.log(`🤖 Analyzing ${symbol} with Gemini AI...`);
-
 		const result = await model.generateContent(prompt);
 		const response = await result.response;
 		const analysis = response.text();
 
-		// Parse AI response into structured signal
 		const signal = parseSignalResponse(analysis, symbol, currentMetrics);
-
-		console.log(
-			`✅ Generated signal for ${symbol}: ${signal.signal} (${signal.confidence}% confidence)`
-		);
 
 		return signal;
 	} catch (error) {
 		console.error('Gemini AI Error:', error);
-
-		// Fallback to rule-based signal if AI fails
 		return createFallbackSignal(symbol, currentMetrics);
 	}
 }
 
 /**
- * Create analysis prompt focusing on LunarCrush's unique differentiator metrics
+ * Create analysis prompt focusing on LunarCrush's unique metrics
  */
 function createAnalysisPrompt(
 	symbol: string,
@@ -187,7 +176,9 @@ function createFallbackSignal(
 	};
 }
 
-// Test function (keep existing one)
+/**
+ * Test Gemini API connection
+ */
 export async function testGeminiConnection(): Promise<boolean> {
 	try {
 		const genAI = getGeminiClient();
@@ -199,12 +190,11 @@ export async function testGeminiConnection(): Promise<boolean> {
 		const response = await result.response;
 		const text = response.text();
 
-		console.log('✅ Gemini test response:', text);
 		return (
 			text.includes('successful') || text.includes('working') || text.length > 0
 		);
 	} catch (error) {
-		console.error('❌ Gemini test failed:', error);
+		console.error('Gemini test failed:', error);
 		return false;
 	}
 }

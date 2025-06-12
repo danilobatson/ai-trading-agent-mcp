@@ -1,4 +1,3 @@
-// src/app/api/job-status/route.ts - API endpoint to check real job progress
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 
@@ -26,7 +25,7 @@ export async function GET(request: NextRequest) {
 				timestamp: new Date().toISOString(),
 			});
 		} else {
-			// Get latest job status (most recent started or completed job)
+			// Get latest job status
 			const { data, error } = await supabase
 				.from('analysis_jobs')
 				.select('*')

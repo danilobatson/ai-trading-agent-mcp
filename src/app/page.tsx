@@ -1,4 +1,3 @@
-// src/app/page.tsx - Fixed Dashboard with Large Progress Overlay
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -46,7 +45,7 @@ interface AnalysisJob {
 	completed_at: string | null;
 }
 
-// Enhanced Real-time Progress Hook with Better Debugging
+// Real-time Progress Hook
 function useJobProgress(jobId: string | null) {
 	const [progress, setProgress] = useState({
 		currentStep: '',
@@ -64,34 +63,22 @@ function useJobProgress(jobId: string | null) {
 			return;
 		}
 
-		console.log(`🔄 Starting real-time progress tracking for job: ${jobId}`);
 		setProgress((prev) => ({ ...prev, isLoading: true, error: null }));
 
-		// Set up real-time subscription with enhanced debugging
+		// Set up real-time subscription
 		const channel = supabase
 			.channel(`job-progress-${jobId}`)
 			.on(
 				'postgres_changes',
 				{
-					event: '*', // Listen to all events (INSERT, UPDATE, DELETE)
+					event: '*',
 					schema: 'public',
 					table: 'analysis_jobs',
 					filter: `id=eq.${jobId}`,
 				},
 				(payload) => {
-					console.log('📊 Real-time update received:', payload);
-					console.log('📊 Event type:', payload.eventType);
-					console.log('📊 New data:', payload.new);
-
 					if (payload.new) {
 						const job = payload.new as any;
-						console.log('📊 Updating progress state:', {
-							currentStep: job.current_step,
-							stepMessage: job.step_message,
-							progressPercentage: job.progress_percentage,
-							status: job.status,
-						});
-
 						setProgress({
 							currentStep: job.current_step || '',
 							stepMessage: job.step_message || '',
@@ -104,20 +91,13 @@ function useJobProgress(jobId: string | null) {
 					}
 				}
 			)
-			.subscribe((status, err) => {
-				console.log('📡 Subscription status:', status);
-				if (err) {
-					console.error('📡 Subscription error:', err);
-				}
-			});
+			.subscribe();
 
-		// Enhanced initial fetch with better error handling
+		// Initial fetch
 		fetchCurrentProgress();
 
 		async function fetchCurrentProgress() {
 			try {
-				console.log(`🔍 Fetching current progress for job: ${jobId}`);
-
 				const { data, error } = await supabase
 					.from('analysis_jobs')
 					.select('*')
@@ -125,16 +105,13 @@ function useJobProgress(jobId: string | null) {
 					.single();
 
 				if (error) {
-					console.error('❌ Error fetching job progress:', error);
 					if (error.code === 'PGRST116') {
-						console.log('Job not found yet, waiting for real-time updates...');
-						return;
+						return; // Job not found yet, wait for real-time updates
 					}
 					throw error;
 				}
 
 				if (data) {
-					console.log('✅ Initial job data:', data);
 					setProgress({
 						currentStep: data.current_step || '',
 						stepMessage: data.step_message || '',
@@ -146,7 +123,7 @@ function useJobProgress(jobId: string | null) {
 					});
 				}
 			} catch (error) {
-				console.error('❌ Failed to fetch job progress:', error);
+				console.error('Failed to fetch job progress:', error);
 				setProgress((prev) => ({
 					...prev,
 					error: error.message,
@@ -155,15 +132,10 @@ function useJobProgress(jobId: string | null) {
 			}
 		}
 
-		// Enhanced polling as backup to real-time
-		const pollInterval = setInterval(() => {
-			console.log('🔄 Polling for progress updates...');
-			fetchCurrentProgress();
-		}, 3000); // Poll every 3 seconds as backup
+		// Polling backup
+		const pollInterval = setInterval(fetchCurrentProgress, 3000);
 
-		// Cleanup subscription and polling
 		return () => {
-			console.log(`🔄 Cleaning up subscription and polling for job: ${jobId}`);
 			supabase.removeChannel(channel);
 			clearInterval(pollInterval);
 		};
@@ -172,7 +144,7 @@ function useJobProgress(jobId: string | null) {
 	return progress;
 }
 
-// Signal Card Component (unchanged)
+// Signal Card Component
 const SignalCard: React.FC<{ signal: TradingSignal }> = ({ signal }) => {
 	const getSignalColor = (signalType: string) => {
 		switch (signalType) {
@@ -331,7 +303,7 @@ const SignalCard: React.FC<{ signal: TradingSignal }> = ({ signal }) => {
 	);
 };
 
-// Large Progress Overlay Component
+// Progress Overlay Component
 const ProgressOverlay: React.FC<{
 	progress: {
 		currentStep: string;
@@ -415,12 +387,12 @@ const ProgressOverlay: React.FC<{
 									className={`flex items-center space-x-2 ${
 										progress.progressPercentage >= 14
 											? 'text-green-400'
-											: 'text-gray-500'
+											: 'text-blue-400'
 									}`}>
 									{progress.progressPercentage >= 14 ? (
 										<Check className='h-4 w-4' />
 									) : (
-										<div className='w-4 h-4 rounded-full border border-gray-500' />
+										<div className='w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin' />
 									)}
 									<span>Initialize Analysis</span>
 								</div>
@@ -540,7 +512,7 @@ const ProgressOverlay: React.FC<{
 	);
 };
 
-// Simplified Trigger Panel Component
+// Trigger Panel Component
 const TriggerPanel: React.FC<{
 	onTrigger: () => void;
 	isLoading: boolean;
@@ -560,7 +532,7 @@ const TriggerPanel: React.FC<{
 			</div>
 
 			<div className='space-y-4'>
-				{/* What gets analyzed */}
+				{/* How signals are generated */}
 				<div className='bg-gray-800/30 rounded-lg p-4'>
 					<h4 className='text-gray-300 text-sm font-medium mb-3'>
 						How Signals Are Generated:
@@ -644,23 +616,19 @@ export default function AITradingDashboard() {
 	const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
 	const [currentJobId, setCurrentJobId] = useState<string | null>(null);
 
-	// Real-time progress tracking
 	const progress = useJobProgress(currentJobId);
 
-	// When analysis completes, refresh signals and clear job tracking
+	// When analysis completes, refresh signals
 	useEffect(() => {
 		if (progress.isComplete) {
-			console.log('🎉 Analysis completed, refreshing signals...');
 			fetchSignals();
-			// Clear job tracking after showing completion for a bit
 			setTimeout(() => setCurrentJobId(null), 5000);
 		}
 	}, [progress.isComplete]);
 
-	// Fetch latest signals from your existing API
+	// Fetch latest signals
 	const fetchSignals = async () => {
 		try {
-			console.log('🔄 Fetching signals from API...');
 			const response = await fetch('/api/signals', {
 				method: 'GET',
 				headers: {
@@ -670,23 +638,20 @@ export default function AITradingDashboard() {
 
 			if (response.ok) {
 				const data = await response.json();
-				console.log('✅ Received data:', data);
 				setSignals(data.signals || []);
 				setJobs(data.jobs || []);
 				setLastUpdate(new Date());
 			} else {
-				const errorText = await response.text();
-				console.error('❌ API response not ok:', response.status, errorText);
+				console.error('Failed to fetch signals:', response.status);
 			}
 		} catch (error) {
-			console.error('❌ Error fetching signals:', error);
+			console.error('Error fetching signals:', error);
 		}
 	};
 
-	// Trigger new analysis with enhanced job tracking
+	// Trigger new analysis
 	const triggerAnalysis = async () => {
 		try {
-			console.log('🚀 Triggering new analysis...');
 			const response = await fetch('/api/trigger', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
@@ -695,31 +660,23 @@ export default function AITradingDashboard() {
 
 			if (response.ok) {
 				const result = await response.json();
-				console.log('✅ Analysis triggered:', result);
 
-				// Enhanced job tracking
 				if (result.jobId) {
-					console.log('🔗 Setting job ID from response:', result.jobId);
 					setCurrentJobId(result.jobId);
 				} else {
-					console.log('🔍 No direct job ID, polling for latest job...');
-					// Poll for the latest job after a short delay
-					setTimeout(() => {
-						pollForLatestJob();
-					}, 2000);
+					setTimeout(pollForLatestJob, 2000);
 				}
 			} else {
-				console.error('❌ Failed to trigger analysis:', response.status);
+				console.error('Failed to trigger analysis:', response.status);
 			}
 		} catch (error) {
-			console.error('❌ Error triggering analysis:', error);
+			console.error('Error triggering analysis:', error);
 		}
 	};
 
-	// Enhanced polling for latest job
+	// Poll for latest job
 	const pollForLatestJob = async () => {
 		try {
-			console.log('🔍 Polling for latest job...');
 			const { data, error } = await supabase
 				.from('analysis_jobs')
 				.select('*')
@@ -728,23 +685,21 @@ export default function AITradingDashboard() {
 				.single();
 
 			if (error) {
-				console.error('❌ Failed to get latest job:', error);
+				console.error('Failed to get latest job:', error);
 				return;
 			}
 
 			if (data && data.status === 'started') {
-				console.log('✅ Found latest job:', data.id);
 				setCurrentJobId(data.id);
 			} else {
-				console.log('🔄 No active job found, retrying in 2 seconds...');
 				setTimeout(pollForLatestJob, 2000);
 			}
 		} catch (error) {
-			console.error('❌ Error polling for latest job:', error);
+			console.error('Error polling for latest job:', error);
 		}
 	};
 
-	// Auto-refresh and manage explanation visibility
+	// Auto-refresh
 	useEffect(() => {
 		fetchSignals();
 		const interval = setInterval(fetchSignals, 30000);
@@ -844,12 +799,11 @@ export default function AITradingDashboard() {
 								</div>
 							</div>
 						</div>
-
 					</div>
 
 					{/* Main Content Area */}
 					<div className='lg:col-span-3'>
-						{/* Beat the Market Section - Always Visible */}
+						{/* Beat the Market Section */}
 						<div className='bg-gray-900/50 border border-gray-700/50 rounded-xl p-8 mb-6'>
 							<div className='text-center mb-6'>
 								<h2 className='text-2xl font-bold text-white mb-2'>
@@ -907,11 +861,11 @@ export default function AITradingDashboard() {
 							</div>
 						</div>
 
-						{/* Dynamic Content Area - Progress or Signals */}
+						{/* Dynamic Content Area */}
 						{progress.isLoading || progress.error || progress.isComplete ? (
 							<ProgressOverlay progress={progress} />
 						) : signals.length === 0 ? (
-							// First time user - show call to action
+							// First time user
 							<div className='bg-gray-900/50 border border-gray-700/50 rounded-xl p-12 text-center'>
 								<AlertCircle className='h-12 w-12 text-gray-500 mx-auto mb-4' />
 								<h3 className='text-xl font-semibold text-gray-300 mb-2'>
@@ -952,7 +906,6 @@ export default function AITradingDashboard() {
 										<SignalCard key={signal.id} signal={signal} />
 									))}
 								</div>
-
 							</div>
 						)}
 					</div>

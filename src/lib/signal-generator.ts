@@ -1,4 +1,4 @@
-// src/lib/signal-generator.ts - Data Aggregation & Signal Generation
+// src/lib/signal-generator.ts - Signal Generation & Database Operations
 import { getSocialMetrics } from '@/lib/lunarcrush';
 import { generateTradingSignal } from '@/lib/gemini';
 import { supabase } from '@/lib/supabase';
@@ -12,12 +12,10 @@ export async function generateSignalForSymbol(
 	symbol: string
 ): Promise<TradingSignal> {
 	try {
-		console.log(`🎯 Generating signal for ${symbol}...`);
-
 		// Step 1: Fetch current social metrics from LunarCrush
 		const currentMetrics = await getSocialMetrics(symbol);
 
-		// Step 2: Get historical data for trend analysis (optional for now)
+		// Step 2: Get historical data for trend analysis
 		const historicalMetrics = await getHistoricalMetrics(symbol, 5);
 
 		// Step 3: Generate AI-powered trading signal
@@ -30,9 +28,6 @@ export async function generateSignalForSymbol(
 		// Step 4: Save signal to database
 		await saveSignalToDatabase(signal);
 
-		console.log(
-			`✅ Generated ${signal.signal} signal for ${symbol} (${signal.confidence}% confidence)`
-		);
 		return signal;
 	} catch (error) {
 		console.error(`Failed to generate signal for ${symbol}:`, error);
@@ -57,14 +52,13 @@ async function getHistoricalMetrics(
 			.limit(limit);
 
 		if (error) {
-			console.warn(`No historical data for ${symbol}:`, error.message);
 			return [];
 		}
 
 		// Extract metrics from historical signals
 		return data?.map((record) => record.metrics as SocialMetrics) || [];
 	} catch (error) {
-		console.warn(`Failed to fetch historical metrics for ${symbol}:`, error);
+		console.error(`Failed to fetch historical metrics for ${symbol}:`, error);
 		return [];
 	}
 }
@@ -121,30 +115,19 @@ export async function getLatestSignals(
  */
 export async function testDataAggregation(): Promise<boolean> {
 	try {
-		console.log('🧪 Testing complete data aggregation flow...');
-
-		// Test 1: Single symbol signal generation
-		console.log('1. Testing single symbol signal generation...');
+		// Test single symbol signal generation
 		const btcSignal = await generateSignalForSymbol('BTC');
 
 		if (!btcSignal || !btcSignal.metrics) {
 			throw new Error('Failed to generate BTC signal');
 		}
 
-		// Test 2: Latest signals retrieval
-		console.log('2. Testing latest signals retrieval...');
+		// Test latest signals retrieval
 		const latestSignals = await getLatestSignals(5);
-
-		console.log('✅ Data aggregation test complete:', {
-			btcSignal: btcSignal.signal,
-			confidence: btcSignal.confidence,
-			reasoning: btcSignal.reasoning.substring(0, 100) + '...',
-			latestCount: latestSignals.length,
-		});
 
 		return true;
 	} catch (error) {
-		console.error('❌ Data aggregation test failed:', error);
+		console.error('Data aggregation test failed:', error);
 		return false;
 	}
 }

@@ -11,12 +11,9 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
-    "@modelcontextprotocol/sdk": "^1.12.1",
     "@supabase/supabase-js": "^2.50.0",
-    "ai": "^4.3.16",
     "autoprefixer": "^10.4.21",
     "clsx": "^2.1.1",
-    "groq-sdk": "^0.24.0",
     "inngest": "^3.39.1",
     "lucide-react": "^0.514.0",
     "next": "15.3.3",
