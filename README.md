@@ -14,7 +14,7 @@
 
 This AI Trading Agent analyzes **real-time social media sentiment** from LunarCrush's API and generates **intelligent trading signals** using Google's Gemini AI. Watch as it processes social data through a **7-step background workflow** with live progress tracking.
 
-### ⚡ **Live Demo**: [See It Live](https://ai-trading-agent-mcp-git-main-danilobatsons-projects.vercel.app/)
+### ⚡ **Live Demo**: [See It Live](https://ai-trading-agent-mcp.vercel.app/)
 
 ### 🔥 **Key Features**
 
