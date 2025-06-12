@@ -52,7 +52,7 @@ npm run dev          # Next.js app (localhost:3000)
 npm run inngest:dev  # Inngest dev server (localhost:8288)
 ```
 
-**🎯 Need the detailed setup?** Continue reading for step-by-step instructions with account creation guides. Review our guide on [dev.to](https://www.dev.to) if you need more assistance
+**🎯 Need the detailed setup?** Continue reading for step-by-step instructions with account creation guides. Review our guide on [dev.to](https://dev.to/dbatson/build-an-ai-trading-agent-with-lunarcrush-google-gemini-in-20-minutes-2bm4) if you need more assistance
 
 ---
 
@@ -555,7 +555,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🚀 Ready to Get Started?
 
 1. **🔥 [Clone the Repository](https://github.com/danilobatson/ai-trading-agent-mcp)**
-2. **📚 [Follow the Setup Guide](#detailed-setup-guide)**
+2. **📚 [Follow the Setup Guide](https://dev.to/dbatson/build-an-ai-trading-agent-with-lunarcrush-google-gemini-in-20-minutes-2bm4)**
 3. **🚀 [Deploy to Production](#deployment)**
 4. **💬 [Join the Discussion](https://github.com/danilobatson/ai-trading-agent-mcp/discussions)**
 
